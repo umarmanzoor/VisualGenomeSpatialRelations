@@ -3,6 +3,7 @@ from math import atan2, degrees
 
 data_dir = Path('data/')
 rels_path = data_dir / 'relationships.json'
+flat_rels_path = data_dir / 'flat_relations.txt'
 objects_path = data_dir / 'objects.json'
 image_data_path = data_dir / 'image_data.json'
 
@@ -18,8 +19,11 @@ class Rectangle:
         self.xcenter = x + w / 2
         self.ycenter = y + h / 2
 
+    def get_string(self):
+        return '%d,%d,%d,%d' % (self.xmin, self.ymin, self.w, self.h)
+
     def __str__(self):
-        return '[%d, %d, %d, %d]' % (self.xmin, self.ymin, self.w, self.h)
+        return '[%s]' % (self.get_string())
 
     def __repr__(self):
         return 'rect' + self.__str__()
@@ -47,9 +51,11 @@ class Rectangle:
 
 
 class SpatialRelation:
-    def __init__(self, a, b):
+    def __init__(self, a, b, rel="", img=""):
         self.a = a
         self.b = b
+        self.rel = rel
+        self.img = img
         self.intersect = a.signed_intersect(b)
         self.union = a.union(b)
         self.x_intersect = self.intersect.w / self.union.w
@@ -122,3 +128,15 @@ class SpatialRelation:
 
     def left(self):
         return 135 < self.degree < 225
+
+    def get_header_string(self):
+        return "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n" % \
+               ('img', 'rel', 'a_x,a_y,a_w,a_h', 'b_x,b_y,b_w,b_h',
+                'DC', 'EC', 'TPP', 'TPPi', 'NTPP', 'NTPPi',
+                'EQ', 'PO', 'above', 'below', 'left', 'right')
+
+    def get_string(self):
+        return "%s,%s,%s,%s,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\n" % \
+               (self.img, self.rel, self.a.get_string(), self.b.get_string(),
+                self.DC(), self.EC(), self.TPP(), self.TPPi(), self.NTPP(), self.NTPPi(),
+                self.EQ(), self.PO(), self.above(), self.below(), self.left(), self.right())

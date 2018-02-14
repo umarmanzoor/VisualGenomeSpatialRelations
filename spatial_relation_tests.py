@@ -144,6 +144,40 @@ class RelationTests(unittest.TestCase):
         self.assertTrue(r.NTPPi(), "NTPPi")
         self.assertFalse(r.PO(), "PO")
 
+    def test_horizontal_direction(self):
+        a = Rectangle(3, 1, 2, 4) # center:(4, 3)
+        b = Rectangle(5, 2, 2, 4) # center:(6, 4)
+
+        r1 = SpatialRelation(a, b) # v = (2, 1) -> degree ~ 26
+        r2 = SpatialRelation(b, a) # v = (-2, -1) -> degree ~ 206
+
+        self.assertTrue(r1.right())
+        self.assertFalse(r1.left())
+        self.assertFalse(r1.above())
+        self.assertFalse(r1.below())
+
+        self.assertFalse(r2.right())
+        self.assertTrue(r2.left())
+        self.assertFalse(r2.above())
+        self.assertFalse(r2.below())
+
+    def test_vertical_direction(self):
+        a = Rectangle(1, 3, 4, 2) # center:(3, 4)
+        b = Rectangle(2, 0, 4, 4) # center:(4, 2)
+
+        r1 = SpatialRelation(a, b) # v = (1, -2) -> degree ~ 296
+        r2 = SpatialRelation(b, a) # v = (1, -2) -> degree ~ 116
+
+        self.assertFalse(r1.right())
+        self.assertFalse(r1.left())
+        self.assertFalse(r1.above())
+        self.assertTrue(r1.below())
+
+        self.assertFalse(r2.right())
+        self.assertFalse(r2.left())
+        self.assertTrue(r2.above())
+        self.assertFalse(r2.below())
+
 
 
 if __name__ == '__main__':

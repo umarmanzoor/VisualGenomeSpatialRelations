@@ -1,4 +1,5 @@
 from pathlib import Path
+from math import atan2, degrees
 
 data_dir = Path('data/')
 rels_path = data_dir / 'relationships.json'
@@ -14,6 +15,8 @@ class Rectangle:
         self.h = h
         self.xmax = x + w
         self.ymax = y + h
+        self.xcenter = x + w / 2
+        self.ycenter = y + h / 2
 
     def __str__(self):
         return '[%d, %d, %d, %d]' % (self.xmin, self.ymin, self.w, self.h)
@@ -51,6 +54,10 @@ class SpatialRelation:
         self.union = a.union(b)
         self.x_intersect = self.intersect.w / self.union.w
         self.y_intersect = self.intersect.h / self.union.h
+        v = (b.xcenter - a.xcenter, b.ycenter - a.ycenter)
+        self.degree = degrees(0 if v[1] == 0 else atan2(v[1], v[0]))
+        if self.degree < 0:
+            self.degree += 360
 
     # a equals to b
     def EQ(self):
@@ -102,3 +109,16 @@ class SpatialRelation:
         return self.intersect.area() > 0 and \
                self.intersect != self.a and \
                self.intersect != self.b
+
+    def above(self):
+        return 45 < self.degree < 135
+
+    def below(self):
+        return 225 < self.degree < 315
+
+    def right(self):
+        return 0 <= self.degree < 45 or \
+               315 < self.degree <= 360
+
+    def left(self):
+        return 135 < self.degree < 225

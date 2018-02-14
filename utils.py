@@ -18,21 +18,26 @@ class Rectangle:
     def __str__(self):
         return '[%d, %d, %d, %d]' % (self.xmin, self.ymin, self.w, self.h)
 
+    def __repr__(self):
+        return 'rect' + self.__str__()
+
     def __eq__(self, other):
         return self.xmin == other.xmin and self.ymin == other.ymin and \
                self.w == other.w and self.h == other.h
 
     def signed_intersect(self, other):
-        r = Rectangle(max(self.xmin, other.xmin), max(self.ymin, other.ymin),
-                      min(self.xmax, other.xmax), min(self.ymax, other.ymax))
-        if r.xmin <= r.xmax and r.ymin <= r.ymax:
-            return r
-        return Rectangle(0, 0, -1, -1)
+        xmin = max(self.xmin, other.xmin)
+        ymin = max(self.ymin, other.ymin)
+        xmax = min(self.xmax, other.xmax)
+        ymax = min(self.ymax, other.ymax)
+        return Rectangle(xmin, ymin, xmax - xmin, ymax - ymin)
 
     def union(self, other):
-        r = Rectangle(min(self.xmin, other.xmin), min(self.ymin, other.ymin),
-                      max(self.xmax, other.xmax), max(self.ymax, other.ymax))
-        return r
+        xmin = min(self.xmin, other.xmin)
+        ymin = min(self.ymin, other.ymin)
+        xmax = max(self.xmax, other.xmax)
+        ymax = max(self.ymax, other.ymax)
+        return Rectangle(xmin, ymin, xmax - xmin, ymax - ymin)
 
     def area(self):
         return 0 if self.h <= 0 or self.w <= 0 else self.w * self.h
@@ -46,25 +51,31 @@ class SpatialRelation:
         self.union = a.union(b)
         self.x_intersect = self.intersect.w / self.union.w
         self.y_intersect = self.intersect.h / self.union.h
-        self.__threshold = 0.1
 
     # a equals to b
     def EQ(self):
         return self.a == self.b
 
+    def touching_inside(self):
+        if self.intersect != self.a and self.intersect != self.b:  # not inside
+            return False
+        return \
+            abs(self.a.xmin - self.b.xmin) == 0 or \
+            abs(self.a.xmax - self.b.xmax) == 0 or \
+            abs(self.a.ymin - self.b.ymin) == 0 or \
+            abs(self.a.ymax - self.b.ymax) == 0
+
     # a inside b and touching
     def TPP(self):
         return not self.EQ() and \
                self.intersect == self.a and \
-               self.x_intersect <= self.__threshold and \
-               self.y_intersect <= self.__threshold
+               self.touching_inside()
 
     # b inside a and touching
     def TPPi(self):
         return not self.EQ() and \
                self.intersect == self.b and \
-               self.x_intersect <= self.__threshold and \
-               self.y_intersect <= self.__threshold
+               self.touching_inside()
 
     # a inside b and not touching
     def NTPP(self):
@@ -80,21 +91,14 @@ class SpatialRelation:
 
     # a and b are far from each other
     def DC(self):
-        # x distance or y distance is bigger than threshold
-        return self.x_intersect < -1 * self.__threshold or \
-               self.y_intersect < -1 * self.__threshold
+        return self.x_intersect < 0 or \
+               self.y_intersect < 0
 
-    # a and b are not inside each other and x_distance and y_distance between them is within the threshold
     def EC(self):
-        return not self.DC() and \
-               self.intersect != self.a and \
-               self.intersect != self.b and \
-               self.x_intersect <= self.__threshold and \
-               self.y_intersect <= self.__threshold
+        return self.x_intersect == 0 or self.y_intersect == 0
 
     # a and b overlapping but none of them inside the other
     def PO(self):
-        return not self.DC() and \
-               not self.EC() and \
+        return self.intersect.area() > 0 and \
                self.intersect != self.a and \
                self.intersect != self.b

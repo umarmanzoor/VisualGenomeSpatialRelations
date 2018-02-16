@@ -51,7 +51,9 @@ class Rectangle:
 
 
 class SpatialRelation:
-    def __init__(self, a, b, rel="", img=""):
+    def __init__(self, a, b, obj="", subj="", rel="", img=""):
+        self.obj = obj
+        self.subj = subj
         self.a = a
         self.b = b
         self.rel = rel
@@ -130,13 +132,13 @@ class SpatialRelation:
         return 135 < self.degree < 225
 
     def get_header_string(self):
-        return "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n" % \
-               ('img', 'rel', 'a_x,a_y,a_w,a_h', 'b_x,b_y,b_w,b_h',
+        return "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n" % \
+               ('img', 'rel','obj','subj','a_x,a_y,a_w,a_h', 'b_x,b_y,b_w,b_h',
                 'DC', 'EC', 'TPP', 'TPPi', 'NTPP', 'NTPPi',
                 'EQ', 'PO', 'above', 'below', 'left', 'right')
 
     def get_string(self):
-        return "%s,%s,%s,%s,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\n" % \
-               (self.img, self.rel, self.a.get_string(), self.b.get_string(),
+        return "%s,%s,%s,%s,%s,%s,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\n" % \
+               (self.img, self.rel,self.obj,self.subj, self.a.get_string(), self.b.get_string(),
                 self.DC(), self.EC(), self.TPP(), self.TPPi(), self.NTPP(), self.NTPPi(),
                 self.EQ(), self.PO(), self.above(), self.below(), self.left(), self.right())
